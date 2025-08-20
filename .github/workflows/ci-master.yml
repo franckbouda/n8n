@@ -10,7 +10,8 @@ on:
 jobs:
   unit-test:
     name: Unit tests
-    uses: ./.github/workflows/units-tests-reusable.yml
+    uses: ./units-tests-reusable.yml
+#    uses: ./.github/workflows/units-tests-reusable.yml
     strategy:
       matrix:
         node-version: [20.x, 22.x, 24.3.x]
@@ -23,7 +24,8 @@ jobs:
 
   lint:
     name: Lint
-    uses: ./.github/workflows/linting-reusable.yml
+    uses: ./linting-reusable.yml
+#    uses: ./.github/workflows/linting-reusable.yml
     with:
       ref: ${{ github.sha }}
 
