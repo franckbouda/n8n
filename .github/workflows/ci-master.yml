@@ -18,8 +18,8 @@ jobs:
       ref: ${{ github.sha }}
       nodeVersion: ${{ matrix.node-version }}
       collectCoverage: ${{ matrix.node-version == '22.x' }}
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+#    secrets:
+#      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   lint:
     name: Lint
@@ -33,10 +33,10 @@ jobs:
     needs: [unit-test, lint]
     steps:
       - name: Notify Slack on failure
-        uses: act10ns/slack@44541246747a30eb3102d87f7a4cc5471b0ffb7d # v2.1.0
+#        uses: act10ns/slack@44541246747a30eb3102d87f7a4cc5471b0ffb7d # v2.1.0
         if: failure()
-        with:
-          status: ${{ job.status }}
-          channel: '#alerts-build'
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          message: Master branch (build or test or lint) failed (${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+#        with:
+#          status: ${{ job.status }}
+#          channel: '#alerts-build'
+#          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+#          message: Master branch (build or test or lint) failed (${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
