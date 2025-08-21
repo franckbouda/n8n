@@ -158,16 +158,19 @@ jobs:
           echo "matrix=$(echo "$MATRIX" | jq -c .)" >> "$GITHUB_OUTPUT"
           echo "Build matrix: $(echo "$MATRIX" | jq .)"
 
+
+
   build-and-push-docker:
     name: Build App, then Build and Push Docker Image (${{ matrix.platform }})
     needs: determine-build-context
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 15
-    strategy:
-      matrix: ${{ fromJSON(needs.determine-build-context.outputs.build_matrix) }}
-    outputs:
+#    runs-on: ${{ matrix.runner }}
+    runs-on: ubuntu-latest
+#    timeout-minutes: 15
+#    strategy:
+#      matrix: ${{ fromJSON(needs.determine-build-context.outputs.build_matrix) }}
+#    outputs:
 #      image_ref: ${{ steps.determine-tags.outputs.primary_ghcr_manifest_tag }}
-      primary_ghcr_manifest_tag: "latest"
+#      primary_ghcr_manifest_tag: "latest"
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
