@@ -174,125 +174,125 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup and Build
-        uses: n8n-io/n8n/.github/actions/setup-nodejs-blacksmith@f5fbbbe0a28a886451c886cac6b49192a39b0eea # v1.104.1
-        with:
-          build-command: pnpm build:n8n
-
-      - name: Determine Docker tags
-        id: determine-tags
-        run: |
-          RELEASE_TYPE="${{ needs.determine-build-context.outputs.release_type }}"
-          N8N_VERSION_TAG="${{ needs.determine-build-context.outputs.n8n_version }}"
-          GHCR_BASE="ghcr.io/${{ github.repository_owner }}/n8n"
-          DOCKER_BASE="${{ secrets.DOCKER_USERNAME }}/n8n"
-          PLATFORM="arm64"
-          #PLATFORM="${{ matrix.platform }}"
-
-          GHCR_TAGS_FOR_PUSH=""
-          DOCKER_TAGS_FOR_PUSH=""
-
-          PRIMARY_GHCR_MANIFEST_TAG_VALUE=""
-
-          # Validate inputs
-          if [[ "$RELEASE_TYPE" == "stable" && -z "$N8N_VERSION_TAG" ]]; then
-            echo "Error: N8N_VERSION_TAG is empty for a stable release."
-            exit 1
-          fi
-
-          if [[ "$RELEASE_TYPE" == "branch" && -z "$N8N_VERSION_TAG" ]]; then
-            echo "Error: N8N_VERSION_TAG is empty for a branch release."
-            exit 1
-          fi
-
-          # Determine tags based on release type
-          case "$RELEASE_TYPE" in
-            "stable")
-              PRIMARY_GHCR_MANIFEST_TAG_VALUE="${GHCR_BASE}:${N8N_VERSION_TAG}"
-              GHCR_TAGS_FOR_PUSH="${PRIMARY_GHCR_MANIFEST_TAG_VALUE}-${PLATFORM}"
-              DOCKER_TAGS_FOR_PUSH="${DOCKER_BASE}:${N8N_VERSION_TAG}-${PLATFORM}"
-              ;;
-            "nightly")
-              PRIMARY_GHCR_MANIFEST_TAG_VALUE="${GHCR_BASE}:nightly"
-              GHCR_TAGS_FOR_PUSH="${PRIMARY_GHCR_MANIFEST_TAG_VALUE}-${PLATFORM}"
-              DOCKER_TAGS_FOR_PUSH="${DOCKER_BASE}:nightly-${PLATFORM}"
-              ;;
-            "branch")
-              PRIMARY_GHCR_MANIFEST_TAG_VALUE="${GHCR_BASE}:${N8N_VERSION_TAG}"
-              GHCR_TAGS_FOR_PUSH="${PRIMARY_GHCR_MANIFEST_TAG_VALUE}-${PLATFORM}"
-              # No Docker Hub tags for branch builds
-              DOCKER_TAGS_FOR_PUSH=""
-              ;;
-            "dev"|*)
-              if [[ "$N8N_VERSION_TAG" == pr-* ]]; then
-                # PR builds only go to GHCR
-                PRIMARY_GHCR_MANIFEST_TAG_VALUE="${GHCR_BASE}:${N8N_VERSION_TAG}"
-                GHCR_TAGS_FOR_PUSH="${PRIMARY_GHCR_MANIFEST_TAG_VALUE}-${PLATFORM}"
-                DOCKER_TAGS_FOR_PUSH=""
-              else
-                # Regular dev builds go to both registries
-                PRIMARY_GHCR_MANIFEST_TAG_VALUE="${GHCR_BASE}:dev"
-                GHCR_TAGS_FOR_PUSH="${PRIMARY_GHCR_MANIFEST_TAG_VALUE}-${PLATFORM}"
-                DOCKER_TAGS_FOR_PUSH="${DOCKER_BASE}:dev-${PLATFORM}"
-              fi
-              ;;
-          esac
-
-          # Combine all tags
-          ALL_TAGS="${GHCR_TAGS_FOR_PUSH}"
-          if [[ -n "$DOCKER_TAGS_FOR_PUSH" ]]; then
-            ALL_TAGS="${ALL_TAGS}\n${DOCKER_TAGS_FOR_PUSH}"
-          fi
-
-          echo "Generated Tags for push: $ALL_TAGS"
-          {
-            echo "tags<<EOF"
-            echo -e "$ALL_TAGS"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
-
-          {
-            echo "ghcr_platform_tag=${GHCR_TAGS_FOR_PUSH}"
-            echo "dockerhub_platform_tag=${DOCKER_TAGS_FOR_PUSH}"
-          } >> "$GITHUB_OUTPUT"
-
-          # Only output manifest tags from the first platform to avoid duplicates
-          if [[ "$PLATFORM" == "amd64" ]]; then
-            echo "primary_ghcr_manifest_tag=${PRIMARY_GHCR_MANIFEST_TAG_VALUE}" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
-
-      - name: Login to GitHub Container Registry
-        if: needs.determine-build-context.outputs.push_enabled == 'true'
-        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Login to DockerHub
-        if: needs.determine-build-context.outputs.push_enabled == 'true' && steps.determine-tags.outputs.dockerhub_platform_tag != ''
-        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push Docker image
-        uses: useblacksmith/build-push-action@574eb0ee0b59c6a687ace24192f0727dfb65d6d7 # v1.2
-        with:
-          context: .
-          file: ./docker/images/n8n/Dockerfile
-          build-args: |
-            NODE_VERSION=22
-            N8N_VERSION=${{ needs.determine-build-context.outputs.n8n_version }}
-            N8N_RELEASE_TYPE=${{ needs.determine-build-context.outputs.release_type }}
-          platforms: ${{ matrix.docker_platform }}
-          provenance: true
-          sbom: true
-          push: ${{ needs.determine-build-context.outputs.push_enabled == 'true' }}
-          tags: ${{ steps.determine-tags.outputs.tags }}
+#      - name: Setup and Build
+#        uses: n8n-io/n8n/.github/actions/setup-nodejs-blacksmith@f5fbbbe0a28a886451c886cac6b49192a39b0eea # v1.104.1
+#        with:
+#          build-command: pnpm build:n8n
+#
+#      - name: Determine Docker tags
+#        id: determine-tags
+#        run: |
+#          RELEASE_TYPE="${{ needs.determine-build-context.outputs.release_type }}"
+#          N8N_VERSION_TAG="${{ needs.determine-build-context.outputs.n8n_version }}"
+#          GHCR_BASE="ghcr.io/${{ github.repository_owner }}/n8n"
+#          DOCKER_BASE="${{ secrets.DOCKER_USERNAME }}/n8n"
+#          PLATFORM="arm64"
+#          #PLATFORM="${{ matrix.platform }}"
+#
+#          GHCR_TAGS_FOR_PUSH=""
+#          DOCKER_TAGS_FOR_PUSH=""
+#
+#          PRIMARY_GHCR_MANIFEST_TAG_VALUE=""
+#
+#          # Validate inputs
+#          if [[ "$RELEASE_TYPE" == "stable" && -z "$N8N_VERSION_TAG" ]]; then
+#            echo "Error: N8N_VERSION_TAG is empty for a stable release."
+#            exit 1
+#          fi
+#
+#          if [[ "$RELEASE_TYPE" == "branch" && -z "$N8N_VERSION_TAG" ]]; then
+#            echo "Error: N8N_VERSION_TAG is empty for a branch release."
+#            exit 1
+#          fi
+#
+#          # Determine tags based on release type
+#          case "$RELEASE_TYPE" in
+#            "stable")
+#              PRIMARY_GHCR_MANIFEST_TAG_VALUE="${GHCR_BASE}:${N8N_VERSION_TAG}"
+#              GHCR_TAGS_FOR_PUSH="${PRIMARY_GHCR_MANIFEST_TAG_VALUE}-${PLATFORM}"
+#              DOCKER_TAGS_FOR_PUSH="${DOCKER_BASE}:${N8N_VERSION_TAG}-${PLATFORM}"
+#              ;;
+#            "nightly")
+#              PRIMARY_GHCR_MANIFEST_TAG_VALUE="${GHCR_BASE}:nightly"
+#              GHCR_TAGS_FOR_PUSH="${PRIMARY_GHCR_MANIFEST_TAG_VALUE}-${PLATFORM}"
+#              DOCKER_TAGS_FOR_PUSH="${DOCKER_BASE}:nightly-${PLATFORM}"
+#              ;;
+#            "branch")
+#              PRIMARY_GHCR_MANIFEST_TAG_VALUE="${GHCR_BASE}:${N8N_VERSION_TAG}"
+#              GHCR_TAGS_FOR_PUSH="${PRIMARY_GHCR_MANIFEST_TAG_VALUE}-${PLATFORM}"
+#              # No Docker Hub tags for branch builds
+#              DOCKER_TAGS_FOR_PUSH=""
+#              ;;
+#            "dev"|*)
+#              if [[ "$N8N_VERSION_TAG" == pr-* ]]; then
+#                # PR builds only go to GHCR
+#                PRIMARY_GHCR_MANIFEST_TAG_VALUE="${GHCR_BASE}:${N8N_VERSION_TAG}"
+#                GHCR_TAGS_FOR_PUSH="${PRIMARY_GHCR_MANIFEST_TAG_VALUE}-${PLATFORM}"
+#                DOCKER_TAGS_FOR_PUSH=""
+#              else
+#                # Regular dev builds go to both registries
+#                PRIMARY_GHCR_MANIFEST_TAG_VALUE="${GHCR_BASE}:dev"
+#                GHCR_TAGS_FOR_PUSH="${PRIMARY_GHCR_MANIFEST_TAG_VALUE}-${PLATFORM}"
+#                DOCKER_TAGS_FOR_PUSH="${DOCKER_BASE}:dev-${PLATFORM}"
+#              fi
+#              ;;
+#          esac
+#
+#          # Combine all tags
+#          ALL_TAGS="${GHCR_TAGS_FOR_PUSH}"
+#          if [[ -n "$DOCKER_TAGS_FOR_PUSH" ]]; then
+#            ALL_TAGS="${ALL_TAGS}\n${DOCKER_TAGS_FOR_PUSH}"
+#          fi
+#
+#          echo "Generated Tags for push: $ALL_TAGS"
+#          {
+#            echo "tags<<EOF"
+#            echo -e "$ALL_TAGS"
+#            echo "EOF"
+#          } >> "$GITHUB_OUTPUT"
+#
+#          {
+#            echo "ghcr_platform_tag=${GHCR_TAGS_FOR_PUSH}"
+#            echo "dockerhub_platform_tag=${DOCKER_TAGS_FOR_PUSH}"
+#          } >> "$GITHUB_OUTPUT"
+#
+#          # Only output manifest tags from the first platform to avoid duplicates
+#          if [[ "$PLATFORM" == "amd64" ]]; then
+#            echo "primary_ghcr_manifest_tag=${PRIMARY_GHCR_MANIFEST_TAG_VALUE}" >> "$GITHUB_OUTPUT"
+#          fi
+#
+#      - name: Set up Docker Buildx
+#        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+#
+#      - name: Login to GitHub Container Registry
+#        if: needs.determine-build-context.outputs.push_enabled == 'true'
+#        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+#        with:
+#          registry: ghcr.io
+#          username: ${{ github.actor }}
+#          password: ${{ secrets.GITHUB_TOKEN }}
+#
+#      - name: Login to DockerHub
+#        if: needs.determine-build-context.outputs.push_enabled == 'true' && steps.determine-tags.outputs.dockerhub_platform_tag != ''
+#        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+#        with:
+#          username: ${{ secrets.DOCKER_USERNAME }}
+#          password: ${{ secrets.DOCKER_PASSWORD }}
+#
+#      - name: Build and push Docker image
+#        uses: useblacksmith/build-push-action@574eb0ee0b59c6a687ace24192f0727dfb65d6d7 # v1.2
+#        with:
+#          context: .
+#          file: ./docker/images/n8n/Dockerfile
+#          build-args: |
+#            NODE_VERSION=22
+#            N8N_VERSION=${{ needs.determine-build-context.outputs.n8n_version }}
+#            N8N_RELEASE_TYPE=${{ needs.determine-build-context.outputs.release_type }}
+#          platforms: ${{ matrix.docker_platform }}
+#          provenance: true
+#          sbom: true
+#          push: ${{ needs.determine-build-context.outputs.push_enabled == 'true' }}
+#          tags: ${{ steps.determine-tags.outputs.tags }}
 
   create_multi_arch_manifest:
     name: Create Multi-Arch Manifest
