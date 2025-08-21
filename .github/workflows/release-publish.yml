@@ -77,7 +77,7 @@ jobs:
     with:
       n8n_version: latest
       release_type: stable
-    secrets: inherit
+#    secrets: inherit
 
 #  create-github-release:
 #    name: Create a GitHub Release
