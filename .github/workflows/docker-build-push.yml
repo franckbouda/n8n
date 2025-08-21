@@ -358,7 +358,6 @@ jobs:
       - name: Create GHCR multi-arch manifest
         if: needs.build-and-push-docker.outputs.primary_ghcr_manifest_tag != ''
         run: |
-#          MANIFEST_TAG="${{ needs.build-and-push-docker.outputs.primary_ghcr_manifest_tag }}"
           MANIFEST_TAG="${{ needs.build-and-push-docker.outputs.primary_ghcr_manifest_tag }}"
           RELEASE_TYPE="${{ needs.determine-build-context.outputs.release_type }}"
 
